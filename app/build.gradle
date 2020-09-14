@@ -5,7 +5,7 @@ android {
     buildToolsVersion "29.0.3"
 
     defaultConfig {
-        applicationId "com.tunieapps.oju_cam"
+        applicationId "com.tunieapps.ojucam"
         minSdkVersion 19
         targetSdkVersion 29
         versionCode 1
@@ -31,6 +31,13 @@ android {
             version "3.10.2"
         }
     }
+    viewBinding {
+        enabled = true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -39,6 +46,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    implementation 'com.jakewharton.timber:timber:4.7.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
 }

@@ -1,4 +1,4 @@
-package com.tunieapps.oju_cam;
+package com.tunieapps.ojucam;
 
 import org.junit.Test;
 
