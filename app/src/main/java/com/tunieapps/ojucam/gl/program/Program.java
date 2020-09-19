@@ -4,7 +4,7 @@ import android.content.Context;
 import android.opengl.GLES20;
 
 import com.tunieapps.ojucam.util.StringUtil;
-import com.tunieapps.ojucam.util.ShaderUtil;
+import com.tunieapps.ojucam.util.GLUtil;
 
 abstract class Program {
     private int mProgramId;
@@ -19,7 +19,7 @@ abstract class Program {
     }
 
     private void create(){
-        mProgramId = ShaderUtil.createProgram(mVertexShader, mFragmentShader);
+        mProgramId = GLUtil.createProgram(mVertexShader, mFragmentShader);
     }
 
     public void use(){

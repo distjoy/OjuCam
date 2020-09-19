@@ -5,7 +5,7 @@ import android.util.Log;
 
 import timber.log.Timber;
 
-public class ShaderUtil {
+public class GLUtil {
 
 
     public static int createProgram(String vertexSource, String fragmentSource){
