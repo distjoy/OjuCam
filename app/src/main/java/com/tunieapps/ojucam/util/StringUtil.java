@@ -8,7 +8,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import timber.log.Timber;
+
 public class StringUtil {
+
+    /**
+     * Reads in text from path to an asset file and returns a String containing the
+     * text.
+     */
+    public static String stringFromAssetPath(Context context,
+                                            String filePath) {
+        InputStream inputStream = null;
+        try {
+            inputStream = context.getResources().getAssets().open(filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return getStringFromStream(inputStream);
+    }
 
     /**
      * Reads in text from a resource file and returns a String containing the
@@ -16,11 +33,23 @@ public class StringUtil {
      */
     public static String stringFromResource(Context context,
                                                   int resourceId) {
-        StringBuilder body = new StringBuilder();
 
+        InputStream inputStream = null;
         try {
-            InputStream inputStream = context.getResources()
+            inputStream = context.getResources()
                     .openRawResource(resourceId);
+        }
+        catch (Resources.NotFoundException nfe) {
+            Timber.e(nfe);
+        }
+
+       return getStringFromStream(inputStream);
+    }
+
+    private static String getStringFromStream(InputStream inputStream){
+        if(inputStream==null) return null;
+        StringBuilder body = new StringBuilder();
+        try{
             InputStreamReader inputStreamReader = new InputStreamReader(
                     inputStream);
             BufferedReader bufferedReader = new BufferedReader(
@@ -33,13 +62,8 @@ public class StringUtil {
                 body.append('\n');
             }
         } catch (IOException e) {
-            throw new RuntimeException(
-                    "Could not open resource: " + resourceId, e);
-        } catch (Resources.NotFoundException nfe) {
-            throw new RuntimeException("Resource not found: "
-                    + resourceId, nfe);
+            Timber.e(e);
         }
-
         return body.toString();
     }
 }

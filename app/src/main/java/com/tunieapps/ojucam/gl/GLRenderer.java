@@ -1,5 +1,6 @@
 package com.tunieapps.ojucam.gl;
 
+import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES20;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 
 import com.tunieapps.ojucam.camera.CameraEngine;
+import com.tunieapps.ojucam.gl.filter.FilterGroup;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -19,9 +21,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     private int surfaceHeight;
     private SurfaceTexture mSurfaceTexture;
     private RenderingEventsListener renderingEventsListener;
-
-    public GLRenderer(CameraEngine cameraEngine){
+    private FilterGroup renderFilter;
+    public GLRenderer(CameraEngine cameraEngine, Context context){
         this.cameraEngine = cameraEngine;
+        renderFilter = new FilterGroup(context);
         initTexture();
     }
 

@@ -28,7 +28,7 @@ public class CameraActivity extends AppCompatActivity {
         binding = ActivityCameraBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         cameraEngine = new CameraEngine();
-        renderer = new GLRenderer(cameraEngine);
+        renderer = new GLRenderer(cameraEngine,this);
         renderer.setRenderingEventsListener(renderingEventsListener);
         setupCameraView();
     }
