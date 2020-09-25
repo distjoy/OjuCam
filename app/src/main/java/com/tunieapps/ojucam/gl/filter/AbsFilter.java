@@ -45,7 +45,7 @@ public abstract class AbsFilter {
     public void onPostDraw(){
         runPostDrawTasks();
     }
-    public void runPreDrawTasks() {
+    private void runPreDrawTasks() {
         while (!mPreDrawTaskList.isEmpty()) {
             mPreDrawTaskList.removeFirst().run();
         }
@@ -57,7 +57,7 @@ public abstract class AbsFilter {
         }
     }
 
-    public void runPostDrawTasks() {
+    private void runPostDrawTasks() {
         while (!mPostDrawTaskList.isEmpty()) {
             mPostDrawTaskList.removeFirst().run();
         }

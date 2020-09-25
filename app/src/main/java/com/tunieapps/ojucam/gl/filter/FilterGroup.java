@@ -1,6 +1,8 @@
 package com.tunieapps.ojucam.gl.filter;
 
 import android.content.Context;
+import android.opengl.GLES20;
+import android.util.Log;
 
 import com.tunieapps.ojucam.gl.FrameBuffer;
 import com.tunieapps.ojucam.gl.Task;
@@ -38,7 +40,28 @@ public class FilterGroup extends AbsFilter {
 
     @Override
     public void onDrawFrame(int textureId) {
-
+        onPreDraw();
+        int size = filters.size();
+        int previousTexture = textureId;
+        for (int i = 0; i < size; i++) {
+            AbsFilter filter = filters.get(i);
+            if (i < size - 1) {
+                filter.setViewport();
+                frameBufferList[i].bind();
+             //   GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                if(filter instanceof FilterGroup)
+                    ((FilterGroup) filter).setParentFrameBuffer(frameBufferList[i]);
+                filter.onDrawFrame(previousTexture);
+                frameBufferList[i].unbind();
+                previousTexture = frameBufferList[i].getFrameBufferTextureId();
+            }else{
+                if(parentFrameBuffer!=null)  //when down a filter group, render the last content on the main parent buffer
+                    parentFrameBuffer.bind();
+                filter.setViewport();
+                filter.onDrawFrame(previousTexture);
+            }
+        }
+        onPostDraw();
     }
 
     @Override
@@ -75,5 +98,13 @@ public class FilterGroup extends AbsFilter {
         parentFrameBuffer =null;
         for(FrameBuffer fbo:frameBufferList)
             fbo.destroy();
+    }
+
+    public void setParentFrameBuffer(FrameBuffer parentFrameBuffer) {
+        this.parentFrameBuffer = parentFrameBuffer;
+    }
+
+    public FrameBuffer getParentFrameBuffer() {
+        return parentFrameBuffer;
     }
 }
