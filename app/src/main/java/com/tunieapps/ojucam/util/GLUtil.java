@@ -7,6 +7,7 @@ import timber.log.Timber;
 
 public class GLUtil {
 
+    public final static int[] ActiveTextureUnits = { GLES20.GL_TEXTURE3, GLES20.GL_TEXTURE4, GLES20.GL_TEXTURE5, GLES20.GL_TEXTURE6, GLES20.GL_TEXTURE7, GLES20.GL_TEXTURE8, GLES20.GL_TEXTURE9, GLES20.GL_TEXTURE10 };
 
     public static int createProgram(String vertexSource, String fragmentSource){
         int vertexShader = compileShader(vertexSource, GLES20.GL_VERTEX_SHADER);

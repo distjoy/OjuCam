@@ -2,6 +2,7 @@ package com.tunieapps.ojucam.util;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.opengl.GLES20;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -66,4 +67,5 @@ public class StringUtil {
         }
         return body.toString();
     }
+
 }

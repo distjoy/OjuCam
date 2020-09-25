@@ -12,7 +12,8 @@ abstract class Program {
     private int mProgramId;
     private String mVertexShader;
     private String mFragmentShader;
-
+    private int maPositionHandle;
+    private int maTextureCoordinateHandle;
 
     public Program(Context context, int vertexShaderRes, int fragmentShaderRes){
         mVertexShader = StringUtil.stringFromResource(context,vertexShaderRes);
@@ -24,8 +25,18 @@ abstract class Program {
         mFragmentShader= StringUtil.stringFromAssetPath(context,fragmentShaderPath);
         create();
     }
-    private void create(){
+    public void create(){
         mProgramId = GLUtil.createProgram(mVertexShader, mFragmentShader);
+        maPositionHandle = GLES20.glGetAttribLocation(mProgramId, "aPosition");
+        GLUtil.checkError("glGetAttribLocation aPosition");
+        if (maPositionHandle == -1) {
+            throw new RuntimeException("Could not get attrib location for aPosition");
+        }
+        maTextureCoordinateHandle = GLES20.glGetAttribLocation(mProgramId, "aTextureCoord");
+        GLUtil.checkError("glGetAttribLocation aTextureCoord");
+        if (maTextureCoordinateHandle == -1) {
+            throw new RuntimeException("Could not get attrib location for aTextureCoord");
+        }
     }
 
     public void setUniform1i(final int programId, final String name, final int intValue) {
@@ -42,7 +53,25 @@ abstract class Program {
         int location=GLES20.glGetUniformLocation(programId,name);
         GLES20.glUniform2fv(location, 1, FloatBuffer.wrap(arrayValue));
     }
+
     public void use(){
         GLES20.glUseProgram(mProgramId);
+    }
+
+
+    public int getId() {
+        return mProgramId;
+    }
+
+    public int getMaPositionHandle() {
+        return maPositionHandle;
+    }
+
+    public int getMaTextureCoordinateHandle() {
+        return maTextureCoordinateHandle;
+    }
+
+    public void delete(){
+        GLES20.glDeleteProgram(mProgramId);
     }
 }
