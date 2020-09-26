@@ -30,9 +30,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         this.cameraEngine = cameraEngine;
         this.context = context;
         renderFilter = new FilterGroup(context);
-        oesFilter = new OESFilter(context);
-        renderFilter.addFilter(oesFilter);
-        initTexture();
     }
 
     private void initTexture() {
@@ -61,7 +58,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+        oesFilter = new OESFilter(context);
+        renderFilter.addFilter(oesFilter);
         renderFilter.init();
+        initTexture();
     }
 
     @Override
@@ -83,7 +83,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 gl) {
-
         getSTMatrix(oesFilter.getSTMatrix());
         renderFilter.onDrawFrame();
 

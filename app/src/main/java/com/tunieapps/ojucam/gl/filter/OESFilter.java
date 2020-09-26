@@ -12,7 +12,8 @@ public class OESFilter extends AbsFilter{
     private TextureOES texture;
     private FrameBuffer frameBuffer;
     private OESProgram program;
-    private float[] STMatrix;
+    private float[] STMatrix = new float[16];
+    ;
     public OESFilter(Context context) {
         super(context);
         program = new OESProgram(context);

@@ -38,7 +38,7 @@ public class CameraEngine  {
     }
 
     public void stopPreview(){
-        camera.startPreview();
+        camera.stopPreview();
     }
 
     public void close(){

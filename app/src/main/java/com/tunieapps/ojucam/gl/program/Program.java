@@ -20,12 +20,12 @@ abstract class Program {
     public Program(Context context, int vertexShaderRes, int fragmentShaderRes){
         mVertexShader = StringUtil.stringFromResource(context,vertexShaderRes);
         mFragmentShader= StringUtil.stringFromResource(context,fragmentShaderRes);
-        create();
+
     }
     public Program(Context context, String vertexShaderPath, String fragmentShaderPath){
         mVertexShader = StringUtil.stringFromAssetPath(context,vertexShaderPath);
         mFragmentShader= StringUtil.stringFromAssetPath(context,fragmentShaderPath);
-        create();
+
     }
     public void create(){
         mProgramId = GLUtil.createProgram(mVertexShader, mFragmentShader);
