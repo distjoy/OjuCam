@@ -2,12 +2,15 @@ package com.tunieapps.ojucam.gl.filter;
 
 import android.content.Context;
 
+import com.tunieapps.Constants;
+import com.tunieapps.ojucam.gl.FrameBuffer;
 import com.tunieapps.ojucam.gl.program.OESProgram;
 import com.tunieapps.ojucam.gl.texture.TextureOES;
 
 public class OESFilter extends AbsFilter{
 
     private TextureOES texture;
+    private FrameBuffer frameBuffer;
     private OESProgram program;
     private float[] STMatrix;
     public OESFilter(Context context) {
@@ -33,20 +36,36 @@ public class OESFilter extends AbsFilter{
     }
 
     @Override
-    public void onDrawFrame(int textureId) {
+    public void onDrawFrame() {
         onPreDraw();
-        texture.upload(program.getsTextureHandle());
+        program.uploadTexture(getTexture(),0);
         plane.draw();
         onPostDraw();
     }
 
+
     @Override
     public void destroy() {
-        texture.delete();
+       if(texture!=null) texture.delete();
+       if(frameBuffer!=null) frameBuffer.destroy();
         program.delete();
     }
 
-    public void setSTMatrix(float[] STMatrix) {
-        this.STMatrix = STMatrix;
+    @Override
+    public int getTexture() {
+        if(texture!=null)
+        return texture.getId();
+        else if(frameBuffer!=null)
+            return frameBuffer.getFrameBufferTextureId();
+        else return Constants.NO_TEXTURE;
+    }
+
+    @Override
+    protected FrameBuffer getBuffer() {
+        return frameBuffer;
+    }
+
+    public float[] getSTMatrix() {
+        return  STMatrix;
     }
 }

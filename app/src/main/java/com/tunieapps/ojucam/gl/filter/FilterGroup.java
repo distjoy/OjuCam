@@ -1,17 +1,16 @@
 package com.tunieapps.ojucam.gl.filter;
 
 import android.content.Context;
-import android.opengl.GLES20;
-import android.util.Log;
 
 import com.tunieapps.ojucam.gl.FrameBuffer;
-import com.tunieapps.ojucam.gl.Task;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class FilterGroup extends AbsFilter {
     FrameBuffer[] frameBufferList;
-    protected List<AbsFilter> filters;
-    private FrameBuffer parentFrameBuffer;
+    protected List<AbsFilter> filters = new ArrayList<>();
+    private FrameBuffer groupRenderScreen; // groupRender screeen is the system graphics for the main main filter group
     public FilterGroup(Context context) {
         super(context);
     }
@@ -24,8 +23,10 @@ public class FilterGroup extends AbsFilter {
         initFrameBuffers();
     }
     private void initFrameBuffers() {
-        parentFrameBuffer =null;
+        groupRenderScreen =null;
         int size = filters.size();
+        if(size==0)
+            return;
         if(frameBufferList != null){
             destroyFrameBuffers();
             frameBufferList=null;
@@ -39,26 +40,25 @@ public class FilterGroup extends AbsFilter {
     }
 
     @Override
-    public void onDrawFrame(int textureId) {
+    public void onDrawFrame() {
         onPreDraw();
         int size = filters.size();
-        int previousTexture = textureId;
         for (int i = 0; i < size; i++) {
             AbsFilter filter = filters.get(i);
             if (i < size - 1) {
                 filter.setViewport();
-                frameBufferList[i].bind();
-             //   GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                FrameBuffer renderScreen = filters.get(i+1).getBuffer(); //render to the buffer of the next element
+             // GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                renderScreen.bind();
                 if(filter instanceof FilterGroup)
-                    ((FilterGroup) filter).setParentFrameBuffer(frameBufferList[i]);
-                filter.onDrawFrame(previousTexture);
-                frameBufferList[i].unbind();
-                previousTexture = frameBufferList[i].getFrameBufferTextureId();
+                    ((FilterGroup) filter).setGroupRenderScreen(renderScreen);
+                filter.onDrawFrame();
+                renderScreen.unbind();
             }else{
-                if(parentFrameBuffer!=null)  //when down a filter group, render the last content on the main parent buffer
-                    parentFrameBuffer.bind();
+                if(groupRenderScreen !=null)  //when down a filter group, render the last content on the main parent buffer
+                    groupRenderScreen.bind();
                 filter.setViewport();
-                filter.onDrawFrame(previousTexture);
+                filter.onDrawFrame();
             }
         }
         onPostDraw();
@@ -82,6 +82,7 @@ public class FilterGroup extends AbsFilter {
             filter.init();
             filters.add(filter);
             initFrameBuffers();
+            onSizeChanged(width,height);
         });
     }
 
@@ -94,17 +95,24 @@ public class FilterGroup extends AbsFilter {
         }
     }
 
+    @Override
+    protected FrameBuffer getBuffer() {
+        if(filters.size()>0)
+            filters.get(0).getBuffer();
+        return null;
+    }
+
     private void destroyFrameBuffers() {
-        parentFrameBuffer =null;
+        groupRenderScreen =null;
         for(FrameBuffer fbo:frameBufferList)
             fbo.destroy();
     }
 
-    public void setParentFrameBuffer(FrameBuffer parentFrameBuffer) {
-        this.parentFrameBuffer = parentFrameBuffer;
+    public void setGroupRenderScreen(FrameBuffer groupRenderScreen) {
+        this.groupRenderScreen = groupRenderScreen;
     }
 
-    public FrameBuffer getParentFrameBuffer() {
-        return parentFrameBuffer;
+    public FrameBuffer getGroupRenderScreen() {
+        return groupRenderScreen;
     }
 }

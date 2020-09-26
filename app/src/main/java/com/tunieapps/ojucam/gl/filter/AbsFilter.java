@@ -3,6 +3,8 @@ package com.tunieapps.ojucam.gl.filter;
 import android.content.Context;
 import android.opengl.GLES20;
 
+import com.tunieapps.Constants;
+import com.tunieapps.ojucam.gl.FrameBuffer;
 import com.tunieapps.ojucam.gl.Task;
 import com.tunieapps.ojucam.gl.object.Plane;
 
@@ -40,7 +42,7 @@ public abstract class AbsFilter {
         GLES20.glClear( GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         runPreDrawTasks();
     }
-    abstract public void onDrawFrame(final int textureId);
+    abstract public void onDrawFrame();
 
     public void onPostDraw(){
         runPostDrawTasks();
@@ -84,4 +86,8 @@ public abstract class AbsFilter {
         return context;
     }
     abstract public void destroy();
+
+    public  int getTexture(){return Constants.NO_TEXTURE;}
+
+    protected abstract FrameBuffer getBuffer();
 }

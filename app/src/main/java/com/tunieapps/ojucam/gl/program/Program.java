@@ -1,8 +1,10 @@
 package com.tunieapps.ojucam.gl.program;
 
 import android.content.Context;
+import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 
+import com.tunieapps.Constants;
 import com.tunieapps.ojucam.util.StringUtil;
 import com.tunieapps.ojucam.util.GLUtil;
 
@@ -39,6 +41,8 @@ abstract class Program {
         }
     }
 
+    abstract void uploadTexture(int textureId, int textureUnitIndex);
+
     public void setUniform1i(final int programId, final String name, final int intValue) {
         int location=GLES20.glGetUniformLocation(programId,name);
         GLES20.glUniform1i(location,intValue);
@@ -66,6 +70,8 @@ abstract class Program {
     public int getMaPositionHandle() {
         return maPositionHandle;
     }
+
+    protected  abstract int getTextureHandle();
 
     public int getMaTextureCoordinateHandle() {
         return maTextureCoordinateHandle;

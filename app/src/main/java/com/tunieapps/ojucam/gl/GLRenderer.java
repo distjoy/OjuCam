@@ -10,6 +10,7 @@ import android.view.SurfaceHolder;
 
 import com.tunieapps.ojucam.camera.CameraEngine;
 import com.tunieapps.ojucam.gl.filter.FilterGroup;
+import com.tunieapps.ojucam.gl.filter.OESFilter;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -22,14 +23,20 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     private SurfaceTexture mSurfaceTexture;
     private RenderingEventsListener renderingEventsListener;
     private FilterGroup renderFilter;
+    private OESFilter oesFilter;
+    private Context context;
+
     public GLRenderer(CameraEngine cameraEngine, Context context){
         this.cameraEngine = cameraEngine;
+        this.context = context;
         renderFilter = new FilterGroup(context);
+        oesFilter = new OESFilter(context);
+        renderFilter.addFilter(oesFilter);
         initTexture();
     }
 
     private void initTexture() {
-        //mSurfaceTexture = new SurfaceTexture(mTextureID);
+        mSurfaceTexture = new SurfaceTexture(oesFilter.getTexture());
         mSurfaceTexture.setOnFrameAvailableListener(surfaceTexture -> {
             if(renderingEventsListener!=null)
                 renderingEventsListener.updateUi();
@@ -54,20 +61,22 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-
+        renderFilter.init();
     }
 
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         this.surfaceWidth=width;
         this.surfaceHeight=height;
-        GLES20.glViewport(0,0,width,height);
+      //  GLES20.glViewport(0,0,width,height);
+        renderFilter.onSizeChanged(width,height);
         if(cameraEngine.isCameraOpened()){
             cameraEngine.stopPreview();
             cameraEngine.close();
         }
         cameraEngine.open();
-        cameraEngine.startPreview(mSurfaceTexture);
+        if(cameraEngine.isCameraOpened())
+            cameraEngine.startPreview(mSurfaceTexture);
     }
 
 
@@ -75,6 +84,15 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 gl) {
 
+        getSTMatrix(oesFilter.getSTMatrix());
+        renderFilter.onDrawFrame();
+
+    }
+
+    private long getSTMatrix(float[] container){
+        mSurfaceTexture.updateTexImage();
+        mSurfaceTexture.getTransformMatrix(container);
+        return mSurfaceTexture.getTimestamp();
     }
 
     public void setRenderingEventsListener(RenderingEventsListener renderingEventsListener) {

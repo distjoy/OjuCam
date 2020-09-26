@@ -31,13 +31,14 @@ public abstract class Texture {
         }
     }
 
-    public void upload(int textureHandle){
+/*    public void upload(int textureHandle){
         if (textureId != Constants.NO_TEXTURE) {
             GLES20.glActiveTexture(textureUnit);
             bind();
             GLES20.glUniform1i(textureHandle, textureUnitIndex);
         }
-    }
+    }*/
+
     protected abstract void bind();
 
     public int getId(){

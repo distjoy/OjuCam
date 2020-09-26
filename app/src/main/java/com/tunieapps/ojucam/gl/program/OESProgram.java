@@ -1,8 +1,10 @@
 package com.tunieapps.ojucam.gl.program;
 
 import android.content.Context;
+import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 
+import com.tunieapps.Constants;
 import com.tunieapps.ojucam.util.GLUtil;
 
 public class OESProgram extends Program {
@@ -24,6 +26,19 @@ public class OESProgram extends Program {
         }
         sTextureHandle = GLES20.glGetUniformLocation(getId(),"sTexture");
         GLUtil.checkError("glGetUniformLocation uniform samplerExternalOES sTexture");
+    }
+
+    @Override
+    public void uploadTexture(int textureId,int textureUnitIndex){
+        if (textureId != Constants.NO_TEXTURE) {
+            GLES20.glActiveTexture(GLUtil.ActiveTextureUnits[textureUnitIndex]);
+            GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, getId());
+            GLES20.glUniform1i(getTextureHandle(), textureUnitIndex);
+        }
+    }
+    @Override
+    protected int getTextureHandle() {
+        return sTextureHandle;
     }
 
     public void setStMatValue(float[] sTMatrix){

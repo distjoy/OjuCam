@@ -15,12 +15,15 @@ public class CameraEngine  {
 
     }
 
-    public void open(){
+    public void open()  {
         try {
             camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
+            cameraOpened = true;
         }catch (Exception exc){
             exc.printStackTrace();
+            cameraOpened = false;
         }
+
     }
     public boolean isCameraOpened() {
         return cameraOpened;
@@ -40,6 +43,7 @@ public class CameraEngine  {
 
     public void close(){
         camera.release();
+         cameraOpened = false;
     }
 
 
