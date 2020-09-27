@@ -12,38 +12,33 @@ public class Plane {
     private FloatBuffer mVerticesBuffer;
     private FloatBuffer mTexCoordinateBuffer;
     private static final int BYTES_PER_FLOAT = 4;
-    private final float trianglesData[] = {
-            -1.0f, -1.0f, 0f,
-            1.0f, -1.0f, 0f,
+    private final float[] trianglesData = {
             -1.0f, 1.0f, 0f,
-            1.0f, 1.0f, 0f
-    };
-    private final float trianglesDataCamera[] = {
-            -1.0f, 1.0f, 0f,
-            -1.0f, -1.0f, 0f,
             1.0f, 1.0f, 0f,
+            -1.0f, -1.0f, 0f,
             1.0f, -1.0f, 0f
     };
 
-    public static final float textureData[] = {
-            0.0f, 1.0f,
-            1.0f, 1.0f,
-            0.0f, 0.0f,
-            1.0f, 0.0f,
+    public static final float[] textureDataFlippedAntiClock90 = {
+        0.0f, 0.0f,
+        0.0f, 1.0f,
+        1.0f, 0.0f,
+        1.0f, 1.0f
     };
+
     public Plane (){
         mVerticesBuffer = ByteBuffer
-                .allocateDirect(trianglesDataCamera.length * BYTES_PER_FLOAT)
+                .allocateDirect(trianglesData.length * BYTES_PER_FLOAT)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer()
-                .put(trianglesDataCamera);
+                .put(trianglesData);
         mVerticesBuffer .position(0);
 
         mTexCoordinateBuffer =  ByteBuffer
-                .allocateDirect(textureData.length * BYTES_PER_FLOAT)
+                .allocateDirect(textureDataFlippedAntiClock90.length * BYTES_PER_FLOAT)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer()
-                .put(textureData);
+                .put(textureDataFlippedAntiClock90);
         mTexCoordinateBuffer.position(0);
     }
     public void uploadVerticesBuffer(int positionHandle){
