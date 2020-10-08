@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 
-import com.tunieapps.ojucam.gl.GLRenderer;
+import com.tunieapps.ojucam.GLRenderer;
 import com.tunieapps.ojucam.camera.CameraEngine;
 import com.tunieapps.ojucam.databinding.ActivityCameraBinding;
 

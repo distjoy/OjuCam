@@ -1,7 +1,6 @@
-package com.tunieapps.ojucam.gl.filter;
+package com.tunieapps.ojucam.filter.base;
 
 import android.content.Context;
-import android.opengl.GLES20;
 
 import com.tunieapps.ojucam.gl.FrameBuffer;
 

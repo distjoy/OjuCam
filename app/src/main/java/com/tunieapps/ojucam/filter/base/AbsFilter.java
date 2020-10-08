@@ -1,12 +1,12 @@
-package com.tunieapps.ojucam.gl.filter;
+package com.tunieapps.ojucam.filter.base;
 
 import android.content.Context;
 import android.opengl.GLES20;
 
-import com.tunieapps.Constants;
+import com.tunieapps.ojucam.model.Constants;
 import com.tunieapps.ojucam.gl.FrameBuffer;
-import com.tunieapps.ojucam.gl.Task;
-import com.tunieapps.ojucam.gl.object.Plane;
+import com.tunieapps.ojucam.Task;
+import com.tunieapps.ojucam.object.Plane;
 
 import java.util.LinkedList;
 
@@ -90,4 +90,5 @@ public abstract class AbsFilter {
     public  int getTexture(){return Constants.NO_TEXTURE;}
 
     protected abstract FrameBuffer getBuffer();
+
 }

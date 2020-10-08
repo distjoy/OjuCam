@@ -1,11 +1,11 @@
-package com.tunieapps.ojucam.gl.filter;
+package com.tunieapps.ojucam.filter.base;
 
 import android.content.Context;
 
-import com.tunieapps.Constants;
+import com.tunieapps.ojucam.model.Constants;
 import com.tunieapps.ojucam.gl.FrameBuffer;
-import com.tunieapps.ojucam.gl.program.OESProgram;
-import com.tunieapps.ojucam.gl.texture.TextureOES;
+import com.tunieapps.ojucam.program.OESProgram;
+import com.tunieapps.ojucam.texture.TextureOES;
 
 public class OESFilter extends AbsFilter{
 
@@ -21,10 +21,7 @@ public class OESFilter extends AbsFilter{
     }
 
     @Override
-    public void init() {
-        program.create();
-        texture.generate();
-    }
+    public void init() { }
 
     @Override
     public void onPreDraw() {

@@ -1,7 +1,6 @@
-package com.tunieapps.ojucam.gl.texture;
+package com.tunieapps.ojucam.texture;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
-import com.tunieapps.Constants;
 
 public class TextureOES extends Texture {
 

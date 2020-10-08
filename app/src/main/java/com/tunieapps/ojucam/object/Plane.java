@@ -1,4 +1,4 @@
-package com.tunieapps.ojucam.gl.object;
+package com.tunieapps.ojucam.object;
 
 import android.opengl.GLES20;
 

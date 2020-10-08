@@ -1,7 +1,11 @@
 package com.tunieapps.ojucam.util;
 
+import android.content.Context;
 import android.opengl.GLES20;
-import android.util.Log;
+
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 import timber.log.Timber;
 
@@ -54,5 +58,18 @@ public class GLUtil {
     public static void checkError(String label) {
         int error;
         while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) { throw new RuntimeException(label + ": glError " + error );}
+    }
+
+    public static ByteBuffer getFrameBuffer(int width, int height, Context context) {
+        final ByteBuffer pixelBuffer = ByteBuffer.allocate(width * height);
+
+        //about 20-50ms
+        long start = System.nanoTime();
+        GLES20.glReadPixels(0, 0, width, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE,
+                pixelBuffer);
+        long end = System.nanoTime();
+
+        Timber.i( "glReadPixels time: " + (end - start)/1000000+" ms");
+        return pixelBuffer;
     }
 }

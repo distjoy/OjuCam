@@ -1,8 +1,8 @@
-package com.tunieapps.ojucam.gl.texture;
+package com.tunieapps.ojucam.texture;
 
 import android.opengl.GLES20;
 
-import com.tunieapps.Constants;
+import com.tunieapps.ojucam.model.Constants;
 import com.tunieapps.ojucam.util.GLUtil;
 
 public abstract class Texture {
@@ -13,11 +13,12 @@ public abstract class Texture {
     public Texture(int textureUnitIndex){
         this.textureUnitIndex = textureUnitIndex;
         this.textureUnit = GLUtil.ActiveTextureUnits[textureUnitIndex];
+        create();
     }
 
     protected abstract void setParams();
 
-    public void generate(){
+    private void create(){
         int[] textures = new int[1];
         GLES20.glGenTextures(1, textures, 0);
         textureId = textures[0];

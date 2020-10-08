@@ -1,10 +1,10 @@
-package com.tunieapps.ojucam.gl.program;
+package com.tunieapps.ojucam.program;
 
 import android.content.Context;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 
-import com.tunieapps.Constants;
+import com.tunieapps.ojucam.model.Constants;
 import com.tunieapps.ojucam.util.GLUtil;
 
 public class OESProgram extends Program {
@@ -17,12 +17,12 @@ public class OESProgram extends Program {
     }
 
     @Override
-    public void create() {
+    protected void create() {
         super.create();
         stMatHandle = GLES20.glGetUniformLocation(getId(), "uSTMatrix");
         GLUtil.checkError("glGetUniformLocation uSTMatrix");
         if (stMatHandle == -1) {
-            throw new RuntimeException("Could not get attrib location for uSTMatrix");
+            throw new RuntimeException("Could not get uniform location for uSTMatrix");
         }
         sTextureHandle = GLES20.glGetUniformLocation(getId(),"sTexture");
         GLUtil.checkError("glGetUniformLocation uniform samplerExternalOES sTexture");
