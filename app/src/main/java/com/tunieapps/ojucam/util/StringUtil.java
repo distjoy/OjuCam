@@ -2,6 +2,7 @@ package com.tunieapps.ojucam.util;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.PointF;
 import android.opengl.GLES20;
 
 import java.io.BufferedReader;
@@ -66,6 +67,18 @@ public class StringUtil {
             Timber.e(e);
         }
         return body.toString();
+    }
+
+
+    public static String getString(PointF[] anArray) {
+        StringBuilder ret = new StringBuilder();
+        for (int i = 0; i < anArray.length; i++) {
+            if (i > 0) {
+                ret.append(", ");
+            }
+            ret.append(i).append("->").append(anArray[i]);
+        }
+        return ret.toString();
     }
 
 }

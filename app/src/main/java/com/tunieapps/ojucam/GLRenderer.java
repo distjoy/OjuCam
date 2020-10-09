@@ -8,6 +8,7 @@ import android.opengl.GLSurfaceView;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.face.Face;
+import com.google.mlkit.vision.face.FaceContour;
 import com.google.mlkit.vision.face.FaceDetection;
 import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
@@ -16,15 +17,20 @@ import com.tunieapps.ojucam.camera.FrameListener;
 import com.tunieapps.ojucam.filter.base.ArFilterGroup;
 import com.tunieapps.ojucam.filter.base.FilterGroup;
 import com.tunieapps.ojucam.filter.base.OESFilter;
+import com.tunieapps.ojucam.util.BitmapUtil;
 import com.tunieapps.ojucam.util.GLUtil;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
+import timber.log.Timber;
+
+import static com.tunieapps.ojucam.util.StringUtil.getString;
 
 public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<List<Face>> {
 
@@ -43,13 +49,18 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
     List<Face> latestFaces =  new ArrayList<>();
     int mFaceCount = 0;
     PointF[][] mFaceDetectResultLst;
+     ByteBuffer pixelBuffer;
+    int width = 480;
+    int height = 640;
 
     public GLRenderer(CameraEngine cameraEngine, Context context){
         this.cameraEngine = cameraEngine;
         this.context = context;
+        mFaceDetectResultLst = new PointF[1][133];
         renderFilter = new FilterGroup(context);
         arFilterGroup = new ArFilterGroup(context);
         cameraEngine.setFrameUpdateListener(cameraFrameListener);
+        initFaceDetector();
 
     }
 
@@ -102,6 +113,7 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         this.surfaceWidth=width;
         this.surfaceHeight=height;
+        pixelBuffer  = ByteBuffer.allocate(surfaceWidth * surfaceHeight*4).order(ByteOrder.LITTLE_ENDIAN);
       //  GLES20.glViewport(0,0,width,height);
         renderFilter.onSizeChanged(width,height);
         if(cameraEngine.isCameraOpened()){
@@ -123,8 +135,8 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
         synchronized (mFaceDetectorLock) {
             getFaceDetectResult();
         }
-        arFilterGroup.onDetectFace(mFaceDetectResultLst);
-        arFilterGroup.onDrawFrame();
+      //  arFilterGroup.onDetectFace(mFaceDetectResultLst);
+      //  arFilterGroup.onDrawFrame();
     }
 
     private long getSTMatrix(float[] container){
@@ -138,6 +150,21 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
     }
     public int getFaceDetectResult() {
         int faceCount = 0;
+        if (null != latestFaces) {
+            mFaceCount = latestFaces.size();
+            for (int f = 0; f < mFaceCount; ++f) {
+                int index = 0;
+                for(FaceContour contour : latestFaces.get(f).getAllContours())
+                    for(PointF pointF : contour.getPoints()) {
+                        PointF pf = new PointF();
+                        pf.x = pointF.x/ surfaceWidth;
+                        pf.y = pointF.y / surfaceHeight;
+                        mFaceDetectResultLst[f][index] = pf;
+                        ++index;
+                    }
+            }
+        }
+       Timber.i(" mFaceDetectResultLst :%s", getString(mFaceDetectResultLst[0]));
         return faceCount;
     }
     @Override
@@ -151,17 +178,15 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
     void runFaceDetect() {
         //save rendered frame
         //run detection on rendered frame
-        ByteBuffer buffer = GLUtil.getFrameBuffer(surfaceWidth,surfaceHeight,context);
+        ByteBuffer buffer = GLUtil.getFrameBuffer(surfaceWidth,surfaceHeight,pixelBuffer);
         synchronized (mFaceDetectorLock) {
             if (null != mFaceDetector) {
-                InputImage image = InputImage.fromByteBuffer(
-                        buffer,
-                        surfaceWidth,
-                        surfaceHeight,
-                        0,
-                        InputImage.IMAGE_FORMAT_YV12 // or IMAGE_FORMAT_YV12
+                InputImage image = InputImage.fromBitmap(
+                        BitmapUtil.bitmapFromBuffer(buffer,surfaceWidth,surfaceHeight),
+                        180
                 );
                 mFaceDetector.process(image).addOnSuccessListener(this);
+                //BitmapUtil.bitmapFromBuffer(buffer,surfaceWidth,surfaceHeight,context);
             }
         }
     }
