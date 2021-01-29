@@ -1,4 +1,4 @@
-package com.tunieapps.ojucam.texture;
+package com.tunieapps.ojucam.filter.common;
 
 import android.opengl.GLES20;
 

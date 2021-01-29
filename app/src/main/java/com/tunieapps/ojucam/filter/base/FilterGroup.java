@@ -2,7 +2,8 @@ package com.tunieapps.ojucam.filter.base;
 
 import android.content.Context;
 
-import com.tunieapps.ojucam.gl.FrameBuffer;
+import com.tunieapps.ojucam.filter.common.FrameBuffer;
+import com.tunieapps.ojucam.filter.common.Texture;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,6 +109,16 @@ public class FilterGroup extends AbsFilter {
         if(filters.size()>0)
             return filters.get(0).getBuffer();
         return null;
+    }
+
+    @Override
+    public Texture getTexture() {
+        return null; //get texture to export for group
+    }
+
+    @Override
+    public void setTexture(Texture texture) {
+        //set texture to use as base
     }
 
     private void destroyFrameBuffers() {

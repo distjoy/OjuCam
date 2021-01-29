@@ -55,7 +55,8 @@ public class CameraEngine implements Camera.PreviewCallback {
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-
+        frameUpdateListener.previewFrame(data,camera.getParameters().getPreviewSize().width,
+                camera.getParameters().getPreviewSize().height);
     }
 
 

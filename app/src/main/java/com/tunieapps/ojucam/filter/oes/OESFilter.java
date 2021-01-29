@@ -1,19 +1,23 @@
-package com.tunieapps.ojucam.filter.base;
+package com.tunieapps.ojucam.filter.oes;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.tunieapps.ojucam.filter.base.AbsFilter;
 import com.tunieapps.ojucam.model.Constants;
-import com.tunieapps.ojucam.gl.FrameBuffer;
-import com.tunieapps.ojucam.program.OESProgram;
-import com.tunieapps.ojucam.texture.TextureOES;
+import com.tunieapps.ojucam.filter.common.FrameBuffer;
+import com.tunieapps.ojucam.filter.common.Texture;
 
-public class OESFilter extends AbsFilter{
 
+public class OESFilter extends AbsFilter {
+
+
+    private static final String TAG = "OESFilter";
     private TextureOES texture;
     private FrameBuffer frameBuffer;
     private OESProgram program;
     private float[] STMatrix = new float[16];
-    ;
+
     public OESFilter(Context context) {
         super(context);
         program = new OESProgram(context);
@@ -28,6 +32,7 @@ public class OESFilter extends AbsFilter{
         super.onPreDraw();
         //upload necessary values
         program.use();
+        Log.d(TAG, "onPreDraw() called use program "+ program.getId());
         plane.uploadTexCoordinateBuffer(program.getMaTextureCoordinateHandle());
         plane.uploadVerticesBuffer(program.getMaPositionHandle());
         program.setStMatValue(STMatrix);
@@ -36,11 +41,17 @@ public class OESFilter extends AbsFilter{
     @Override
     public void onDrawFrame() {
         onPreDraw();
-        program.uploadTexture(getTexture(),0);
+        program.uploadTexture(getTextureId(),0);
         plane.draw();
         onPostDraw();
     }
-
+    @Override
+    public void onPostDraw() {
+        super.onPostDraw();
+        //upload necessary values
+        program.disableAttributes();
+        program.unbindTexture();
+    }
 
     @Override
     public void destroy() {
@@ -50,7 +61,7 @@ public class OESFilter extends AbsFilter{
     }
 
     @Override
-    public int getTexture() {
+    public int getTextureId() {
         if(texture!=null)
         return texture.getId();
         else if(frameBuffer!=null)
@@ -62,6 +73,14 @@ public class OESFilter extends AbsFilter{
     protected FrameBuffer getBuffer() {
         return frameBuffer;
     }
+
+    @Override
+    public Texture getTexture() {
+        return texture;
+    }
+
+    @Override
+    public void setTexture(Texture texture) { }
 
     public float[] getSTMatrix() {
         return  STMatrix;

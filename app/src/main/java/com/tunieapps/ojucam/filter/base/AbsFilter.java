@@ -4,15 +4,17 @@ import android.content.Context;
 import android.opengl.GLES20;
 
 import com.tunieapps.ojucam.model.Constants;
-import com.tunieapps.ojucam.gl.FrameBuffer;
+import com.tunieapps.ojucam.filter.common.FrameBuffer;
 import com.tunieapps.ojucam.Task;
+import com.tunieapps.ojucam.filter.common.Texture;
 import com.tunieapps.ojucam.object.Plane;
-
 import java.util.LinkedList;
+
+import timber.log.Timber;
 
 public abstract class AbsFilter {
 
-
+    private static final String TAG = "AbsFilter";
     protected int width, height;
     protected Plane plane;
     private Context context;
@@ -38,8 +40,12 @@ public abstract class AbsFilter {
 
 
     public void onPreDraw(){
-        GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1f);
-        GLES20.glClear( GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
+        if(!(this instanceof ArFilterGroup||this instanceof ArFilter)){
+            GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1f);
+            GLES20.glClear( GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
+            Timber.d("onPreDraw() called class: " + this.getClass().getCanonicalName());
+        }
+
         runPreDrawTasks();
     }
     abstract public void onDrawFrame();
@@ -87,8 +93,11 @@ public abstract class AbsFilter {
     }
     abstract public void destroy();
 
-    public  int getTexture(){return Constants.NO_TEXTURE;}
+    public  int getTextureId(){return Constants.NO_TEXTURE;}
 
     protected abstract FrameBuffer getBuffer();
 
+    public abstract Texture getTexture();
+
+    public abstract void setTexture(Texture texture);
 }

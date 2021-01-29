@@ -1,10 +1,12 @@
-package com.tunieapps.ojucam.texture;
+package com.tunieapps.ojucam.filter.simple2d;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 
+import com.tunieapps.ojucam.filter.common.Texture;
 import com.tunieapps.ojucam.util.BitmapUtil;
+import com.tunieapps.ojucam.util.GLUtil;
 
 public class Texture2D extends Texture {
 
@@ -24,10 +26,10 @@ public class Texture2D extends Texture {
                 GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
         GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
                 GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
+ /*       GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
                 GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
         GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D,
-                GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+                GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);*/
     }
 
     @Override
@@ -40,7 +42,9 @@ public class Texture2D extends Texture {
     //load to memory in onPredraw
     public void loadToMemory(){
         if(bitmap!=null) {
+            bind();
             GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+            GLUtil.checkError("GLUtils.texImage2D");
             bitmap.recycle();
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
         }

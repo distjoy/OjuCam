@@ -80,5 +80,15 @@ public class StringUtil {
         }
         return ret.toString();
     }
+    public static String getString(float[] anArray) {
+        StringBuilder ret = new StringBuilder();
+        for (int i = 0; i < anArray.length; i++) {
+            if (i > 0) {
+                ret.append(", ");
+            }
+            ret.append(i).append("->").append(anArray[i]);
+        }
+        return ret.toString();
+    }
 
 }

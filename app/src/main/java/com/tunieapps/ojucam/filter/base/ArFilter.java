@@ -14,6 +14,7 @@ public abstract class ArFilter extends AbsFilter {
     {
         PointF pointF = new PointF();
         pointF.x = (2.0F * x / this.getWidth() - 1.0F);
+       // pointF.y =  (2.0F * y / this.getHeight() - 1.0F);
         pointF.y = (2.0F * (1.0F - y / this.getHeight()) - 1.0F);
         return pointF;
     }
