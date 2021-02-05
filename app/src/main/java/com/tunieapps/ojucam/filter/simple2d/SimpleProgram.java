@@ -26,23 +26,23 @@ public class SimpleProgram extends Program {
         matrixHandle = GLES20.glGetUniformLocation(getId(), "uMVPMatrix");
         GLUtil.checkError("glGetUniformLocation uMVPMatrix");
         if (matrixHandle == -1) {
-            throw new RuntimeException("Could not get uniform location for uMVPMatrix");
+           // throw new RuntimeException("Could not get uniform location for uMVPMatrix");
         }
         sTextureHandle = GLES20.glGetUniformLocation(getId(),"mainImageText");
         GLUtil.checkError("glGetUniformLocation uniform samplerExternalOES mainImageText");
         if (sTextureHandle == -1) {
-            throw new RuntimeException("Could not get uniform location for mainImageText");
+           // throw new RuntimeException("Could not get uniform location for mainImageText");
         }
     }
 
     @Override
     public void uploadTexture(int textureId, int textureUnitIndex) {
-        Timber.d("uploadMakeUpTexture() called with: textureId = [" + textureId + "], textureUnitIndex = [" + textureUnitIndex + "], makeUpTextureLoc = ["+ sTextureHandle +"]");
         if (textureId != Constants.NO_TEXTURE||sTextureHandle!=-1) {
+            Timber.d("uploadTexture() called with: textureId = [" + textureId + "], textureUnitIndex = [" + textureUnitIndex + "], makeUpTextureLoc = ["+ sTextureHandle +"]");
 
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
-            GLES20.glUniform1i(sTextureHandle, 1);
+            GLES20.glUniform1i(sTextureHandle, 0);
             checkError("uploadMakeUpTexture");
         }
     }
@@ -55,5 +55,10 @@ public class SimpleProgram extends Program {
     @Override
     protected int getTextureHandle() {
         return sTextureHandle;
+    }
+
+    public void setMvpMat(float[] mvpMat) {
+        if(matrixHandle==-1) return;
+        GLES20.glUniformMatrix4fv(matrixHandle, 1, false, mvpMat, 0);
     }
 }

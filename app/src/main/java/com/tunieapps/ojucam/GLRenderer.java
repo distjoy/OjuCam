@@ -14,22 +14,28 @@ import com.google.mlkit.vision.face.FaceContour;
 import com.google.mlkit.vision.face.FaceDetection;
 import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
+import com.lemon.faceu.sdk.utils.JniEntry;
 import com.tunieapps.ojucam.camera.CameraEngine;
 import com.tunieapps.ojucam.camera.FrameListener;
 import com.tunieapps.ojucam.filter.base.ArFilterGroup;
 import com.tunieapps.ojucam.filter.base.FilterGroup;
-import com.tunieapps.ojucam.filter.oes.OESFilter;
 import com.tunieapps.ojucam.filter.facedrawing.MakeUpData;
 import com.tunieapps.ojucam.filter.facedrawing.MakeUpFilter;
+import com.tunieapps.ojucam.filter.oes.OESFilter;
 import com.tunieapps.ojucam.filter.simple2d.SimpleFilter;
+import com.tunieapps.ojucam.model.PreviewBuffer;
+import com.tunieapps.ojucam.util.BitmapUtil;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
+import timber.log.Timber;
 
 import static com.tunieapps.ojucam.util.StringUtil.getString;
 import static com.tunieapps.ojucam.util.StringUtil.stringFromAssetPath;
@@ -45,22 +51,26 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
     private SurfaceTexture mSurfaceTexture;
     private RenderingEventsListener renderingEventsListener;
     private FilterGroup renderFilter;
-    private ArFilterGroup arFilterGroup;
+   private ArFilterGroup arFilterGroup;
     private OESFilter oesFilter;
     private SimpleFilter simpleFilter;
     private Context context;
 
+    boolean isDetecting;
     final Object mFaceDetectorLock = new Object();
     FaceDetector mFaceDetector;
     List<Face> latestFaces =  new ArrayList<>();
+    final Queue<PreviewBuffer> bufferQueue = new LinkedList<>();;
     int mFaceCount = 0;
     PointF[][] mFaceDetectResultLst;
-     ByteBuffer pixelBuffer;
+     //ByteBuffer pixelBuffer;
     int width = 480;
     int height = 640;
     MakeUpFilter makeUpFilter;
     Gson gson = new Gson();
     MakeUpData makeUpData;
+
+    ByteBuffer frameBuffer;
     public GLRenderer(CameraEngine cameraEngine, Context context){
         this.cameraEngine = cameraEngine;
         this.context = context;
@@ -71,8 +81,7 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
         initFaceDetector();
 
         makeUpData  = gson.fromJson(stringFromAssetPath(context,"makeup_filter.json"), MakeUpData.class);
-
-    }
+   }
 
     public void initFaceDetector() {
         mFaceDetectResultLst = new PointF[1][133];
@@ -96,7 +105,10 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
 
     private void initSurfaceTexture() {
         mSurfaceTexture = new SurfaceTexture(oesFilter.getTextureId());
-        mSurfaceTexture.setOnFrameAvailableListener(surfaceTexture -> {});
+        mSurfaceTexture.setOnFrameAvailableListener(surfaceTexture -> {
+            if(renderingEventsListener!=null)
+                renderingEventsListener.updateUi();
+        });
     }
 
     public void onPause(){
@@ -118,10 +130,11 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
         oesFilter = new OESFilter(context);
-        renderFilter.addFilter(oesFilter);
+        simpleFilter = new SimpleFilter(context);
+        renderFilter.addFilter(simpleFilter);
         renderFilter.init();
         makeUpFilter = new MakeUpFilter(context,makeUpData);
-        makeUpFilter.setTexture(oesFilter.getTexture());
+        makeUpFilter.setTexture(simpleFilter.getTexture());
         arFilterGroup.addFilter(makeUpFilter);
         arFilterGroup.init();
         initSurfaceTexture();
@@ -133,7 +146,7 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
      //   eglGetCurrentDisplay()
         this.surfaceWidth=width;
         this.surfaceHeight=height;
-        pixelBuffer  = ByteBuffer.allocate(surfaceWidth * surfaceHeight*4).order(ByteOrder.LITTLE_ENDIAN);
+     //   pixelBuffer  = ByteBuffer.allocate(surfaceWidth * surfaceHeight*4).order(ByteOrder.LITTLE_ENDIAN);
       //  GLES20.glViewport(0,0,width,height);
         renderFilter.onSizeChanged(width,height);
         arFilterGroup.onSizeChanged(width,height);
@@ -147,17 +160,23 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
     }
 
 
-    boolean drawn = false;
-
     @Override
     public void onDrawFrame(GL10 gl) {
         Log.d(TAG, "onDrawFrame() called with: start");
         getSTMatrix(oesFilter.getSTMatrix());
+        System.arraycopy(oesFilter.getSTMatrix(),0,simpleFilter.getMatrix(),0,oesFilter.getSTMatrix().length);
         makeUpFilter.setSTMatrix(oesFilter.getSTMatrix());
-        renderFilter.onDrawFrame();
 
+        synchronized (bufferQueue) {
+            while (!bufferQueue.isEmpty()) {
+                PreviewBuffer buffer = bufferQueue.poll();
+                if (buffer != null)
+                    processFrame(buffer);
+            }
+        }
+        renderFilter.onDrawFrame();
         synchronized (mFaceDetectorLock) {
-            getFaceDetectResult();
+           getFaceDetectResult();
         }
         arFilterGroup.onDetectFace(mFaceDetectResultLst);
         arFilterGroup.onDrawFrame();
@@ -182,33 +201,38 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
                 for(FaceContour contour : latestFaces.get(f).getAllContours())
                     for(PointF pointF : contour.getPoints()) {
                         PointF pf = new PointF();
-                        pf.x = pointF.x;
-                        pf.y = pointF.y ;
+                        pf.x = ((cameraWidth-pointF.x)/cameraWidth)*surfaceWidth;
+                      //  pf.x = pointF.x;
+                        pf.y = (pointF.y /cameraHeight)*surfaceHeight;
+                    //    pf.y = pointF.y;
                         mFaceDetectResultLst[f][index] = pf;
                         ++index;
                     }
             }
         }
-      // Timber.i(" mFaceDetectResultLst :%s", getString(mFaceDetectResultLst[0]));
+      Timber.i(" mFaceDetectResultLst :%s", getString(mFaceDetectResultLst[0]));
         return faceCount;
     }
     @Override
     public void onSuccess(List<Face> faces) {
+        Log.d(TAG, "onSuccess() called with: faces = [" + faces + "]");
         // Task completed successfully
         latestFaces = faces;
         if (null != renderingEventsListener) {
             renderingEventsListener.updateUi();
-        }
+        }isDetecting = false;
     }
     void runFaceDetect(byte[] data) {
         synchronized (mFaceDetectorLock) {
             if (null != mFaceDetector) {
+                Log.d(TAG, "runFaceDetect() called with: width = [" + cameraWidth + "] height +[" + cameraHeight +"]");
                 InputImage image = InputImage.fromByteArray(
                         data,
                         cameraWidth,
                         cameraHeight,
-                        InputImage.IMAGE_FORMAT_YV12,
-                        180
+                        90,
+                        InputImage.IMAGE_FORMAT_YV12
+
                 );
                 mFaceDetector.process(image).addOnSuccessListener(this);
             }
@@ -230,14 +254,31 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
             }
         }
     }*/
+
     public  interface RenderingEventsListener { void updateUi();}
-    private FrameListener cameraFrameListener = (byte[] data, int width, int height) -> {
-        cameraWidth = width;
-        cameraHeight = height;
-        runFaceDetect(data);
-        //pass byte to texture 2dfilter.updateTexture(data)
+    private FrameListener cameraFrameListener = (byte[] data, int bufferSize, int width, int height) -> {
+        PreviewBuffer buffer = new PreviewBuffer(bufferSize,width,height);
+        buffer.putData(data);
+
+        synchronized (bufferQueue){
+            bufferQueue.add(buffer);
+        }
 
     };
+
+    private void processFrame(PreviewBuffer previewBuffer){
+        cameraWidth = previewBuffer.getWidth();
+        cameraHeight = previewBuffer.getHeight();
+
+        if (frameBuffer == null || frameBuffer.capacity() != cameraWidth * cameraHeight * 4) {
+            frameBuffer = ByteBuffer.allocate(cameraWidth * cameraHeight * 4);
+        }
+
+        if(!isDetecting) runFaceDetect(previewBuffer.getFrame());
+        JniEntry.YUVtoRBGA(previewBuffer.getFrame(), cameraWidth, cameraHeight, frameBuffer.array());
+        simpleFilter.updateTextureContent(frameBuffer,cameraWidth,cameraHeight);
+        frameBuffer.clear();
+    }
 
 
 }

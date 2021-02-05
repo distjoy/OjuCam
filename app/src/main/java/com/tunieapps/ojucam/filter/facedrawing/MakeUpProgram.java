@@ -59,12 +59,21 @@ public class MakeUpProgram extends Program {
         Timber.d("Program  create() called makeUpTextureLoc =[ "+makeUpTextureLoc+"]");
     }
 
-    @Override
+/*    @Override
     public void uploadTexture(int textureId, int textureUnitIndex) {
         if (textureId != Constants.NO_TEXTURE ||mainTextureLoc!=-1) {
             GLES20.glActiveTexture(GLUtil.ActiveTextureUnits[textureUnitIndex]);
             GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureId);
             GLES20.glUniform1i(mainTextureLoc, textureUnitIndex);
+            checkError("uploadMakeUpTexture");
+        }
+    }*/
+    @Override
+    public void uploadTexture(int textureId, int textureUnitIndex) {
+        if (textureId != Constants.NO_TEXTURE ||mainTextureLoc!=-1) {
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
+            GLES20.glUniform1i(mainTextureLoc, 0);
             checkError("uploadMakeUpTexture");
         }
     }

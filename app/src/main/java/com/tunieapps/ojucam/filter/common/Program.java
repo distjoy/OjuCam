@@ -34,12 +34,12 @@ public abstract class Program {
         maPositionHandle = GLES20.glGetAttribLocation(mProgramId, "aPosition");
         GLUtil.checkError("glGetAttribLocation aPosition");
         if (maPositionHandle == -1) {
-           throw new RuntimeException("Could not get attrib location for aPosition");
+     //      throw new RuntimeException("Could not get attrib location for aPosition");
         }
         maTextureCoordinateHandle = GLES20.glGetAttribLocation(mProgramId, "aMainTextCoord");
         GLUtil.checkError("glGetAttribLocation aMainTextCoord");
         if (maTextureCoordinateHandle == -1) {
-           throw new RuntimeException("Could not get attrib location for aMainTextCoord");
+        //   throw new RuntimeException("Could not get attrib location for aMainTextCoord");
         }
 
         Timber.d("Program  create() called maTextureCoordinateHandle =[ "+maTextureCoordinateHandle+"], maPositionHandle ["+ maPositionHandle +"]");

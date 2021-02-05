@@ -1,5 +1,5 @@
 package com.tunieapps.ojucam.camera;
 
 public interface FrameListener {
-    void previewFrame(byte[] data, int width, int height);
+    void previewFrame(byte[] data, int bufferSize, int width, int height);
 }

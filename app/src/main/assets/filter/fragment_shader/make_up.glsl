@@ -2,7 +2,7 @@
 precision mediump float;
 varying highp vec2 vMainTextCoord;
 varying highp vec2 vTextCoord2;
-uniform samplerExternalOES mainImageText;
+uniform sampler2D mainImageText;
 uniform sampler2D imageText2;
 uniform vec4 uColor;
 uniform int stage;

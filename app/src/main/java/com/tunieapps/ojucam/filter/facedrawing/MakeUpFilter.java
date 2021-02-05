@@ -2,6 +2,7 @@ package com.tunieapps.ojucam.filter.facedrawing;
 
 import android.content.Context;
 import android.graphics.PointF;
+import android.opengl.Matrix;
 import android.util.Log;
 
 import com.tunieapps.ojucam.filter.base.ArFilter;
@@ -19,7 +20,7 @@ public class MakeUpFilter extends ArFilter {
 
     private static final String TAG = "MakeUpFilter";
     Texture2D makeUpTexture;
-    TextureOES mainTexture;
+    Texture2D mainTexture;
     MakeUpProgram program;
 
     Mesh mesh;
@@ -31,6 +32,7 @@ public class MakeUpFilter extends ArFilter {
         this.data = data;
         program = new  MakeUpProgram(getContext());
         makeUpTexture = new Texture2D(0,getContext());
+        Matrix.setIdentityM(STMatrix,0);
     }
 
     @Override
@@ -70,7 +72,7 @@ public class MakeUpFilter extends ArFilter {
 
 
         //program.setStage(0);
-        //program.uploadTexture(mainTexture.getId(),0);
+        program.uploadTexture(mainTexture.getId(),0);
        // plane.draw();
         //onPostDraw();
         mesh.uploadVerticesBuffer(program.getMaPositionHandle());
@@ -163,8 +165,8 @@ public class MakeUpFilter extends ArFilter {
 
     @Override
     public void setTexture(Texture texture) {
-        if(texture instanceof TextureOES)
-            mainTexture = (TextureOES) texture;
+        if(texture instanceof Texture2D)
+            mainTexture = (Texture2D) texture;
     }
 
     public void setSTMatrix(float[] STMatrix) {
