@@ -105,9 +105,9 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
 
     private void initSurfaceTexture() {
         mSurfaceTexture = new SurfaceTexture(oesFilter.getTextureId());
-        mSurfaceTexture.setOnFrameAvailableListener(surfaceTexture -> {
+        mSurfaceTexture.setOnFrameAvailableListener(surfaceTexture -> {/*
             if(renderingEventsListener!=null)
-                renderingEventsListener.updateUi();
+                renderingEventsListener.updateUi();*/
         });
     }
 
@@ -170,8 +170,14 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
         synchronized (bufferQueue) {
             while (!bufferQueue.isEmpty()) {
                 PreviewBuffer buffer = bufferQueue.poll();
-                if (buffer != null)
-                    processFrame(buffer);
+                if (buffer != null) {
+                    if (frameBuffer == null || frameBuffer.capacity() != cameraWidth * cameraHeight * 4) {
+                        frameBuffer = ByteBuffer.allocate(cameraWidth * cameraHeight * 4);
+                    }
+                    JniEntry.YUVtoRBGA(buffer.getFrame(), cameraWidth, cameraHeight, frameBuffer.array());
+                    simpleFilter.updateTextureContent(frameBuffer,cameraWidth,cameraHeight);
+                    frameBuffer.clear();
+                }
             }
         }
         renderFilter.onDrawFrame();
@@ -201,16 +207,16 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
                 for(FaceContour contour : latestFaces.get(f).getAllContours())
                     for(PointF pointF : contour.getPoints()) {
                         PointF pf = new PointF();
-                        pf.x = ((cameraWidth-pointF.x)/cameraWidth)*surfaceWidth;
+                        pf.x = ( (cameraHeight-pointF.x)/cameraHeight ) *surfaceWidth;
                       //  pf.x = pointF.x;
-                        pf.y = (pointF.y /cameraHeight)*surfaceHeight;
+                        pf.y = (( pointF.y)/cameraWidth)*surfaceHeight;
                     //    pf.y = pointF.y;
                         mFaceDetectResultLst[f][index] = pf;
                         ++index;
                     }
             }
         }
-      Timber.i(" mFaceDetectResultLst :%s", getString(mFaceDetectResultLst[0]));
+      Timber.i(" mFaceDetectResultLst :%s with width: %s and height: %s", getString(mFaceDetectResultLst[0]), surfaceWidth,surfaceHeight);
         return faceCount;
     }
     @Override
@@ -230,7 +236,7 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
                         data,
                         cameraWidth,
                         cameraHeight,
-                        90,
+                        270,
                         InputImage.IMAGE_FORMAT_YV12
 
                 );
@@ -261,7 +267,10 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
         buffer.putData(data);
 
         synchronized (bufferQueue){
-            bufferQueue.add(buffer);
+            if(bufferQueue.isEmpty()) {
+                processFrame(buffer);
+                bufferQueue.add(buffer);
+            }
         }
 
     };
@@ -269,16 +278,9 @@ public class GLRenderer implements GLSurfaceView.Renderer , OnSuccessListener<Li
     private void processFrame(PreviewBuffer previewBuffer){
         cameraWidth = previewBuffer.getWidth();
         cameraHeight = previewBuffer.getHeight();
-
-        if (frameBuffer == null || frameBuffer.capacity() != cameraWidth * cameraHeight * 4) {
-            frameBuffer = ByteBuffer.allocate(cameraWidth * cameraHeight * 4);
-        }
-
         if(!isDetecting) runFaceDetect(previewBuffer.getFrame());
-        JniEntry.YUVtoRBGA(previewBuffer.getFrame(), cameraWidth, cameraHeight, frameBuffer.array());
-        simpleFilter.updateTextureContent(frameBuffer,cameraWidth,cameraHeight);
-        frameBuffer.clear();
     }
+
 
 
 }

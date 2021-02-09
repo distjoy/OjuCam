@@ -36,7 +36,7 @@ public class CameraActivity extends AppCompatActivity {
     private void setupCameraView() {
         binding.surfaceView.setEGLContextClientVersion(2);
         binding.surfaceView.setRenderer(renderer);
-        binding.surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        binding.surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
     }
 
